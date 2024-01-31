@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions, status, viewsets
+from rest_framework import permissions, status, filters, viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
@@ -53,16 +53,11 @@ class CommentViewSet(BaseViewSet):
 class FollowViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = FollowSerializer
     permission_classes = (permissions.IsAuthenticated,)
-
-    def get_following(self):
-        return get_object_or_404(Follow, id=self.kwargs['following_id'])
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('following__username',)
 
     def get_queryset(self):
-        if self.request.user.is_authenticated:
-            return Follow.objects.all()
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return self.request.user.follower.all()
 
     def perform_create(self, serializer):
-        serializer.save(
-            author=self.request.user, following=self.get_following()
-        )
+        serializer.save(user=self.request.user)
