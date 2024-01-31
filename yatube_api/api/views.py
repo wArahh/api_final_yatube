@@ -1,10 +1,12 @@
 from django.shortcuts import get_object_or_404
-from posts.models import Comment, Group, Post, Follow
-from rest_framework import status, viewsets, permissions
-from rest_framework.response import Response
+from rest_framework import permissions, status, viewsets
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.response import Response
 
-from .serializers import CommentSerializer, GroupSerializer, PostSerializer, FollowSerializer
+from posts.models import Comment, Follow, Group, Post
+
+from .serializers import (CommentSerializer, FollowSerializer, GroupSerializer,
+                          PostSerializer)
 
 
 class BaseViewSet(viewsets.ModelViewSet):
@@ -56,7 +58,11 @@ class FollowViewSet(viewsets.ReadOnlyModelViewSet):
         return get_object_or_404(Follow, id=self.kwargs['following_id'])
 
     def get_queryset(self):
-        return Follow.objects.all()
+        if self.request.user.is_authenticated:
+            return Follow.objects.all()
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user, following=self.get_following())
+        serializer.save(
+            author=self.request.user, following=self.get_following()
+        )
