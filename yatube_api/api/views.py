@@ -51,14 +51,11 @@ class FollowViewSet(
     search_fields = ('user__username', 'following__username')
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        serializer = FollowSerializer(data=request.data)
         if serializer.is_valid():
-            self.perform_create(serializer)
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(
-                serializer.errors, status=status.HTTP_400_BAD_REQUEST
-            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get_queryset(self):
         return self.request.user.follower.all()
