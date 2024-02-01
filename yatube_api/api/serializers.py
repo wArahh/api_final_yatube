@@ -50,7 +50,7 @@ class FollowSerializer(serializers.ModelSerializer):
         queryset=Follow.objects.all(),
         fields=('user', 'following'),
         message=ALREADY_FOLLOW,
-    )
+    ),
 
     class Meta:
         model = Follow
