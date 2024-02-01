@@ -1,17 +1,16 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions, status, filters, viewsets, mixins
+from rest_framework import permissions, filters, viewsets, mixins
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.response import Response
-
-from posts.models import Comment, Group, Post
 
 from .serializers import (CommentSerializer, FollowSerializer, GroupSerializer,
                           PostSerializer)
 
+from posts.models import Comment, Group, Post
+
 
 class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all()
     serializer_class = PostSerializer
+    queryset = Post.objects.all()
     pagination_class = LimitOffsetPagination
 
     def perform_create(self, serializer):
@@ -26,18 +25,6 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
 
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if instance.author != self.request.user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        return super().update(request, *args, **kwargs)
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if instance.author != self.request.user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        return super().destroy(request, *args, **kwargs)
-
     def get_post(self):
         return get_object_or_404(Post, id=self.kwargs['post_id'])
 
@@ -48,9 +35,11 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, post=self.get_post())
 
 
-class FollowViewSet(mixins.CreateModelMixin,
-                    mixins.ListModelMixin,
-                    viewsets.GenericViewSet):
+class FollowViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet
+):
     serializer_class = FollowSerializer
     permission_classes = (permissions.IsAuthenticated,)
     filter_backends = (filters.SearchFilter,)
