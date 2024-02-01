@@ -56,7 +56,9 @@ class FollowViewSet(
             self.perform_create(serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
 
     def get_queryset(self):
         return self.request.user.follower.all()
