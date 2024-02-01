@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions, status, filters, viewsets
+from rest_framework import permissions, status, filters, viewsets, mixins
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
@@ -50,7 +50,9 @@ class CommentViewSet(BaseViewSet):
         serializer.save(author=self.request.user, post=self.get_post())
 
 
-class FollowViewSet(viewsets.ReadOnlyModelViewSet):
+class FollowViewSet(mixins.CreateModelMixin,
+                    mixins.ListModelMixin,
+                    viewsets.GenericViewSet):
     serializer_class = FollowSerializer
     permission_classes = (permissions.IsAuthenticated,)
     filter_backends = (filters.SearchFilter,)
