@@ -9,7 +9,11 @@ from .serializers import (CommentSerializer, FollowSerializer, GroupSerializer,
                           PostSerializer)
 
 
-class BaseViewSet(viewsets.ModelViewSet):
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    pagination_class = LimitOffsetPagination
+
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.author != self.request.user:
@@ -22,12 +26,6 @@ class BaseViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_403_FORBIDDEN)
         return super().destroy(request, *args, **kwargs)
 
-
-class PostViewSet(BaseViewSet):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
-    pagination_class = LimitOffsetPagination
-
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
@@ -37,8 +35,20 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = GroupSerializer
 
 
-class CommentViewSet(BaseViewSet):
+class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.author != self.request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        return super().update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.author != self.request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        return super().destroy(request, *args, **kwargs)
 
     def get_post(self):
         return get_object_or_404(Post, id=self.kwargs['post_id'])
