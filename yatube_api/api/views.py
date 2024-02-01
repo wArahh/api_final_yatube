@@ -5,6 +5,7 @@ from rest_framework.response import Response
 
 from .serializers import (CommentSerializer, FollowSerializer, GroupSerializer,
                           PostSerializer)
+from .permissions import AuthorOrSafe
 
 from posts.models import Comment, Group, Post
 
@@ -13,6 +14,7 @@ class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     queryset = Post.objects.all()
     pagination_class = LimitOffsetPagination
+    permission_classes = (AuthorOrSafe,)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -37,6 +39,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
+    permission_classes = (AuthorOrSafe,)
 
     def get_post(self):
         return get_object_or_404(Post, id=self.kwargs['post_id'])
