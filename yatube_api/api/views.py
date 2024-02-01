@@ -13,6 +13,18 @@ class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     pagination_class = LimitOffsetPagination
 
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.author != self.request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        return super().update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.author != self.request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        return super().destroy(request, *args, **kwargs)
+
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
