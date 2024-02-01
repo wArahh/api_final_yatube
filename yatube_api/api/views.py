@@ -13,6 +13,7 @@ class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     pagination_class = LimitOffsetPagination
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
