@@ -4,6 +4,8 @@ from posts.models import Comment, Follow, Group, Post, User
 from rest_framework.fields import CurrentUserDefault
 from rest_framework.validators import UniqueTogetherValidator
 
+already_follow = 'Вы уже подписаны на этого пользователя.'
+
 
 class PostSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
@@ -43,10 +45,10 @@ class FollowSerializer(serializers.ModelSerializer):
         queryset=User.objects.all()
     )
     validators = UniqueTogetherValidator(
-        queryset=Follow.objects.all(),
-        fields=('follower', 'followed_user'),
-        message='Вы уже подписаны на этого пользователя.'
-    )
+            queryset=Follow.objects.all(),
+            fields=('user', 'following',),
+            message=already_follow,
+        ),
 
     class Meta:
         model = Follow
